@@ -1,26 +1,17 @@
-import React from "react";
-import { useAppSelector } from "../../../redux/hooks";
-import { BsArrowRight } from "react-icons/bs";
-import { Node } from "./LinkedList";
-import "./LinkedList.css";
-const LinkedListDisplay = () => {
-  const list = useAppSelector((state) => state.linkedList);
+import React, { RefObject, useEffect, useState } from "react";
+import { BsArrowRight, BsArrowUp } from "react-icons/bs";
+import { LinkedListContextType, Node } from "../../../types/LinkedListTypes";
+import s from "./LinkedList.module.scss";
+import { LinkedListContext } from "../../../context/LinkedListContext";
+import { log } from "console";
 
-  const displayList = [];
-  // Render the Linked List
-  let currNode = list.head;
-  while (currNode.next) {
-    displayList.push(currNode);
-    currNode = currNode.next;
-  }
-  displayList.push(list.tail);
+const LinkedListDisplay = () => {
+  const list = React.useContext(LinkedListContext) as LinkedListContextType;
+
 
   return (
-    <div className="flex_row ll_display">
-      {displayList.map((node, i) => {
-        console.log(node.isHead);
-        console.log(node.isTail);
-
+    <div className={`${s.ll_container}`}>
+      {list.display.map((node, i) => {
         return <DisplayNode key={i} node={node} />;
       })}
     </div>
@@ -33,13 +24,28 @@ interface NodeProps {
   node: Node;
 }
 const DisplayNode = ({ node }: NodeProps) => {
+  const overlap = node.isHead && node.isTail;
+
   return (
     <>
-      <div className="ll_node lg_font center_text">
-        {node.data}
-        {!node.isTail && <BsArrowRight className="ll_pointer" />}
-        
+      <div className={`${s.node} ${overlap && s.overlap} ${node.new && `new_el`} ${node.selected && 'selected_el'}`}>
+        <span>{node.data}</span>
+        {node.next && <BsArrowRight className={`${s.next_pointer} ${node.next.new && 'new_el'}`} />}
+        {node.isHead && <Identifier pointer="head" />}
+        {node.isTail && <Identifier pointer="tail" />}
       </div>
     </>
+  );
+};
+
+interface IdentifierProps {
+  pointer: "head" | "tail";
+}
+const Identifier = ({ pointer }: IdentifierProps) => {
+  return (
+    <div className={`${s.identifier} ${s[pointer]}`}>
+      <BsArrowUp className={`${s.up_pointer}`} />
+      <span>{pointer}</span>
+    </div>
   );
 };

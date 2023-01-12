@@ -1,20 +1,26 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
+import { DSTypes } from "./types/util";
 
 export interface AppState {
-    activeDS:string
+    activeDS:DSTypes
+    animationInProgress:boolean
 }
 
 const initialState: AppState = {
-    activeDS:'Linked List'
+    activeDS:'Linked List',
+    animationInProgress: false
 }
 
 export const appSlice = createSlice({
     name:'app',
     initialState,
     reducers:{
-        selectDS(state, {payload}: PayloadAction<string>){
+        selectDS(state, {payload}: PayloadAction<DSTypes>){
             state.activeDS = payload
+        },
+        toggleAnimation(state){
+            state.animationInProgress = !state.animationInProgress
         }
     }
 })

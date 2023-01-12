@@ -1,0 +1,57 @@
+@use "../../../util";
+//Variables
+$pointer-size: 3.5rem;
+
+/****************** Linked List Display Styles ******************/
+.ll_container {
+  height: 100%;
+  @include util.flex(row, center, center);
+}
+
+//Node styles
+.node {
+  $size: 4em;
+  font-size: util.$lg-font;
+
+  position: relative;
+  @include util.circle($size);
+  @include util.center-text($size);
+
+  margin-right: 3em;
+}
+.node:last-child {
+  margin-right: 0;
+}
+
+
+
+// Next Pointer
+.next_pointer {
+  position: absolute;
+  left: 111%;
+  top: 22%;
+  font-size: $pointer-size;
+}
+
+// Head and Tail Pointer
+.identifier {
+  position: absolute;
+  top: 110%;
+  left: 20%;
+  @include util.flex(column, center, center);
+
+  span {
+    text-transform: capitalize;
+    margin-top: -1em;
+  }
+}
+
+.overlap .identifier.tail {
+  top: 220%;
+}
+
+.up_pointer {
+  font-size: $pointer-size;
+}
+
+/****************** END Linked List Display Styles ******************/

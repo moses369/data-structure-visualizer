@@ -1,7 +1,9 @@
 import React from "react";
 import { selectDS } from "../../AppSlice";
-import { useAppDispatch, useAppSelector } from "../../redux/hooks";
-import "./Nav.css";
+import { AppContext, AppContextTypes } from "../../context/AppContextProvider";
+import { DSTypes } from "../../types/util";
+
+import s from "./Nav.module.scss";
 const Nav = () => {
   return (
     <nav>
@@ -13,16 +15,18 @@ const Nav = () => {
 
 // Component for each DS link
 interface DSLinkProps {
-  text: string;
+  text: DSTypes;
 }
 const DSLink = ({ text }: DSLinkProps) => {
-  const dispatch = useAppDispatch();
-  const activeDS = useAppSelector((state) => state.app.activeDS);
+  const { activeDS, selectDS, animationInProgress } = React.useContext(
+    AppContext
+  ) as AppContextTypes;
   return (
     <button
-      className="ds_link sm_font"
+      disabled={animationInProgress}
+      className={`${s.link}`}
       onClick={() => {
-        activeDS !== text && dispatch(selectDS(text));
+        activeDS !== text && selectDS(text);
       }}
     >
       {text}

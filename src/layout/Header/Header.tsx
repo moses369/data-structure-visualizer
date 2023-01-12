@@ -1,10 +1,10 @@
 import React from 'react'
 import Nav from '../Nav/Nav'
-import './Header.css'
+import s from './Header.module.scss'
 const Header = () => {
   return (
-    <header className='header_container'>
-        <h1 className='header_Title'>Data Structure Visualizer</h1>
+    <header className={`${s.container}`}>
+        <h1 >Data Structure Visualizer</h1>
         <Nav/>
     </header>
   )

@@ -1,0 +1,44 @@
+/***************** Variables *****************/
+//Colors
+$bg-color: #242424;
+$color-1: rgba(255, 255, 255, 0.87);
+$color-2: #00b530;
+
+//DS Color Identifiers
+$new-el: #00b530;
+$selected-el: #ffcc00;
+$removed-el: #ff0000;
+
+//Fonts
+$sm-font: 1.15rem;
+$md-font: 1.25rem;
+$lg-font: 1.5rem;
+/***************** END Variables *****************/
+
+/*****************  Mix-Ins *****************/
+//create a flexbox row
+@mixin flex($direction: row, $justify: null, $align: null) {
+  display: flex;
+  flex-direction: $direction;
+  @if $justify {
+    justify-content: $justify;
+  }
+  @if $align {
+    align-items: $align;
+  }
+}
+// Add the height of the element you want to center the text to, must be a fixed height
+@mixin center-text($vertical: null) {
+  text-align: center;
+  @if $vertical {
+    line-height: $vertical;
+  }
+}
+//create a circle with a fixed height and width
+@mixin circle($size, $border-color: $color-1) {
+  width: $size;
+  height: $size;
+  border-radius: 50%;
+  border: 1px solid $border-color;
+}
+/*****************  END Mix-Ins *****************/

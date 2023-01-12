@@ -1,3 +1,4 @@
+@use 'util';
 :root {
   font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
 
@@ -10,13 +11,10 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
-
-  /* Variables */
-  --bg-color: #242424;
-  --color-1: rgba(255, 255, 255, 0.87);
-  --color-2: #00b530;
 }
 
+
+/***************** All Styling *****************/
 * {
   box-sizing: border-box;
   margin: 0;
@@ -28,33 +26,27 @@ a,
 button {
   text-decoration: none;
   cursor: pointer;
-  color: var(--color-2);
+  color: util.$color-2;
 }
 
 a:hover,
-button:hover{
-  color: var(--color-1);
+button:hover {
+  color: util.$color-1;
 }
 
 /***************** END Tag Styles *****************/
-
 /***************** Sub Classes *****************/
-.sm_font {
-  font-size: 1.15rem;
+.new_el{
+  color: util.$new-el;
+  border-color: util.$new-el;
 }
-.md_font {
-  font-size: 1.25rem;
+.selected_el{
+  color: util.$selected-el;
+  border-color: util.$selected-el;
 }
-.lg_font {
-  font-size: 1.5rem;
+.removed_el{
+  color: util.$removed-el;
+  border-color: util.$removed-el;
 }
 
-.center_text {
-  text-align: center;
-}
-
-.flex_row {
-  display: flex;
-  flex-direction: row;
-}
 /***************** END Sub Classes *****************/

@@ -1,9 +1,9 @@
-.nav_container{
-    margin-top: 1em;
-    
-}
+@use '../../util';
 
-.ds_link{
+
+.link{
+    font-size: util.$sm-font ;
+
     border: none;
     background: none;
 

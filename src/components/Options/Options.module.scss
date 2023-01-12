@@ -1,0 +1,5 @@
+@use '../../util';
+.container{
+    width: 30%;
+    border: 1px solid util.$color-1
+}

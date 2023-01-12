@@ -1,13 +1,16 @@
+
 export class Node {
   public data: number | null;
   public next: Node | null;
-  public isHead:boolean;
-  public isTail:boolean;
+  // Properties for displaying html
+  public isHead: boolean;
+  public isTail: boolean;
+  public new: boolean;
+  public selected: boolean;
   constructor(data: number | null = null, next: Node | null = null) {
     this.data = data;
     this.next = next;
-    this.isHead = false
-    this.isTail = false
+    this.isHead = this.isTail = this.new = this.selected = false;
   }
 }
 export class LinkedList {
@@ -106,4 +109,15 @@ export class LinkedList {
   public contains(num: number): boolean {
     return !!this._getNode(num);
   }
+}
+export interface LinkedListState {
+  head: Node;
+  tail: Node;
+  size: number;
+}
+
+export interface LinkedListContextType {
+  display: Node[];
+  append: (num: number) => void;
+  prepend: (num: number) => void;
 }
