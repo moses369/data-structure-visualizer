@@ -7,10 +7,11 @@ export class Node {
   public isTail: boolean;
   public new: boolean;
   public selected: boolean;
+  public removed: boolean;
   constructor(data: number | null = null, next: Node | null = null) {
     this.data = data;
     this.next = next;
-    this.isHead = this.isTail = this.new = this.selected = false;
+    this.isHead = this.isTail = this.new = this.selected = this.removed = false;
   }
 }
 export class LinkedList {
@@ -116,8 +117,22 @@ export interface LinkedListState {
   size: number;
 }
 
+export type VoidFunc = () => void
+
 export interface LinkedListContextType {
   display: Node[];
   append: (num: number) => void;
   prepend: (num: number) => void;
+  removeHead: VoidFunc;
+  removeTail: VoidFunc;
+  clear : (instant?:boolean) => void;
 }
+
+export type GetHeadOrTailType =  (
+  updatingTail: boolean,
+  arr: Node[],
+  updateOpposite?: boolean
+) => number
+
+export type UpdateNodeDisplay = Node[] | (([param]: Node[]) => Node[])
+

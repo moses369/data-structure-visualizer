@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import { ReactChildren } from "../types/util";
 import {
   LinkedListContextType,
-  LinkedListState,
   Node,
+  GetHeadOrTailType,
+  UpdateNodeDisplay,
 } from "../types/LinkedListTypes";
 import { AppContext, AppContextTypes } from "./AppContextProvider";
 
@@ -11,216 +12,238 @@ export const LinkedListContext = React.createContext<
   LinkedListContextType | undefined
 >(undefined);
 
-/* Initialize the Context state */
-const initNode = new Node();
-const initialState: LinkedListState = {
-  head: initNode,
-  tail: initNode,
-  size: 0,
-};
-const defaultState = () => {
-  [3].forEach((num) => {
-    if (initialState.head.data === null) {
-      initialState.head.data = initialState.tail.data = num;
-      initialState.head.isHead = initialState.head.isTail = true;
-    } else {
-      initialState.tail.isTail = false;
-      initialState.head.isTail = false;
+const getHeadOrTail: GetHeadOrTailType = (updatingTail, arr, updateOpposite) =>
+  updateOpposite
+    ? updatingTail
+      ? 0
+      : arr.length - 1
+    : updatingTail
+    ? arr.length - 1
+    : 0;
+const getPreHeadOrTail: GetHeadOrTailType = (
+  updatingTail,
+  arr,
+  updateOpposite
+) =>
+  updateOpposite
+    ? updatingTail
+      ? 1
+      : arr.length - 2
+    : updatingTail
+    ? arr.length - 2
+    : 1;
 
-      const newNode = new Node(num);
-      newNode.isTail = true;
-      initialState.tail.next = newNode;
-      initialState.tail = newNode;
-    }
-    initialState.size++;
-  });
-};
-defaultState();
-/* END Initialize the Context state */
+const node = (num: number) => new Node(num);
 
 const LinkedListContextProvider = ({ children }: ReactChildren) => {
-  const [state, setState] = useState<LinkedListState>(initialState);
-  const [displayList, setDisplay] = useState<Node[]>([]);
-
+  const [displayList, setDisplay] = useState<Node[]>(
+    [node(3), node(4), node(5)].map((node, i, arr) => {
+      if (i === 0) node.isHead = true;
+      if (arr[i + 1]) node.next = arr[i + 1];
+      if (i === arr.length - 1) node.isTail = true;
+      return node;
+    })
+  );
   const { toggleAnimation } = React.useContext(AppContext) as AppContextTypes;
-  //Updates the displaed linked list
-  useEffect(() => {
-    const nodes = [];
-    let currNode = state.head;
-    nodes.push(currNode);
-    while (currNode.next) {
-      nodes.push(currNode.next);
-      currNode = currNode.next;
-    }
-    setDisplay(nodes);
-  }, [state]);
 
-  /**
-   * Time between animations
-   */
-  const stepTime = 1000;
+  /************* Utility Functions **************/
+  const stepDelay = 500;
+  const step = (stateChange: UpdateNodeDisplay, delay: number) => {
+    setTimeout(() => {
+      setDisplay(stateChange);
+    }, delay);
+    return (delay += stepDelay);
+  };
+  const clearColorIndicators = () => {
+    setDisplay((old) =>
+      old.map((node) => {
+        node.new = node.selected = node.removed = false;
+        return node;
+      })
+    );
+  };
+  /************* End Utility Functions **************/
+
+  /************* Adding Nodes **************/
+  const addNode = (addToTail: boolean, num: number) => {
+    if (displayList.length === 7) return;
+    toggleAnimation(); //says an animation is in progress
+    clearColorIndicators();
+    let timeout = 0;
+    //If there is no head/tail
+    if (displayList.length === 0) {
+      const newNode = node(num);
+      newNode.isHead = newNode.isTail = newNode.new = true;
+      setDisplay([newNode]);
+      toggleAnimation();
+      return;
+    }
+
+    //Get Tail/Head
+    timeout = step((old) => {
+      const newList = [...old];
+
+      const HorT = getHeadOrTail(addToTail, newList);
+      // reset new/selector indicators on prepends
+      if (newList[HorT]) newList[HorT].selected = true;
+      return newList;
+    }, timeout);
+
+    //Add New Node
+    timeout = step((old) => {
+      const newList = [...old];
+      const newNode = node(num);
+
+      newNode.new = true;
+      newList[addToTail ? "push" : "unshift"](newNode);
+      return newList;
+    }, timeout);
+
+    //Add Next Pointer to new Node
+    timeout = step((old) => {
+      const newList = [...old];
+      newList[addToTail ? newList.length - 2 : 0].next =
+        newList[getHeadOrTail(addToTail, newList)];
+      return newList;
+    }, timeout);
+
+    //Removes  Tail Pointer
+    timeout = step((old) => {
+      const newList = [...old];
+      newList[getPreHeadOrTail(addToTail, newList)][
+        addToTail ? "isTail" : "isHead"
+      ] = false;
+      return newList;
+    }, timeout);
+
+    // Updates Tail Pointer and resets selected
+    timeout = step((old) => {
+      const newList = [...old];
+      newList[getPreHeadOrTail(addToTail, newList)].selected = false;
+      newList[getHeadOrTail(addToTail, newList)][
+        addToTail ? "isTail" : "isHead"
+      ] = true;
+      toggleAnimation();
+      return newList;
+    }, timeout);
+  };
 
   const append = (num: number) => {
-
-    if (state.size === 7) return;
-    toggleAnimation(); //says an animation is in progress
-
-    let timeout = 0;
-    //Get Tail
-    setTimeout(() => {
-      setDisplay((old) => {
-        const newList = [...old];
-        // reset new indicator on prepends
-        if(newList[0])newList[0].new = false
-        if (newList[newList.length - 1]) {
-          newList[newList.length - 1].new = false;
-          newList[newList.length - 1].selected = true;
-        }
-        return newList;
-      });
-    }, timeout);
-    timeout += stepTime;
-    //Add New Node
-    setTimeout(() => {
-      setDisplay((old) => {
-        const newList = [...old];
-        const newNode = new Node(num);
-
-        newNode.new = true;
-        newList.push(newNode);
-        return newList;
-      });
-    }, timeout);
-    timeout += stepTime;
-
-    //Add Next Pointer to new Tail
-    setTimeout(() => {
-      console.log(timeout);
-      setDisplay((old) => {
-        const newList = [...old];
-        newList[newList.length - 2].next = newList[newList.length - 1];
-        return newList;
-      });
-    }, timeout);
-    timeout += stepTime;
-
-    //Change Tail Pointer
-    setTimeout(() => {
-      setDisplay((old) => {
-        const newList = [...old];
-        newList[newList.length - 2].isTail = false;
-        return newList;
-      });
-    }, timeout);
-    timeout += stepTime;
-
-    // Transforms the actual head of the Linked list
-    setTimeout(() => {
-      setState((old) => {
-        const newState = { ...old };
-        if (newState.head.data === null) {
-          newState.head.data = newState.tail.data = num;
-          newState.head.isHead = newState.head.isTail = true;
-        } else {
-          //Reset head and old tail marker
-          newState.tail.isTail =
-            newState.tail.new =
-            newState.tail.selected =
-              false;
-          //Addd new node
-          const newNode = new Node(num);
-          newNode.isTail = newNode.new = true;
-          newState.tail.next = newNode;
-          newState.tail = newNode;
-        }
-        newState.size++;
-        toggleAnimation(); // ends an animation is in progress
-        return newState;
-      });
-    }, timeout);
+    addNode(true, num);
   };
 
   const prepend = (num: number) => {
-    if (state.size === 7) return;
-    toggleAnimation(); //says an animation is in progress
-    let timeout = 0;
-    //Get Head
-    setTimeout(() => {
-      setDisplay((old) => {
-        const newList = [...old];
-        // reset new indicator on appends
-        if(newList[newList.length - 1])newList[newList.length - 1].new = false
-        if (newList[0]) {
-          newList[0].new = false;
-          newList[0].selected = true;
-        }
-        return newList;
-      });
-    }, timeout);
-    timeout += stepTime;
-
-    //Add New Node
-    setTimeout(() => {
-      setDisplay((old) => {
-        const newList = [...old];
-        const newNode = new Node(num);
-
-        newNode.new = true;
-        newList.unshift(newNode);
-        return newList;
-      });
-    }, timeout);
-    timeout += stepTime;
-
-    //Add Next Pointer to new Head
-    setTimeout(() => {
-      console.log(timeout);
-      setDisplay((old) => {
-        const newList = [...old];
-        newList[0].next = newList[1];
-        return newList;
-      });
-    }, timeout);
-    timeout += stepTime;
-
-    //Change Head Pointer
-    setTimeout(() => {
-      setDisplay((old) => {
-        const newList = [...old];
-        newList[1].isHead = false;
-        return newList;
-      });
-    }, timeout);
-    timeout += stepTime;
-
-    // Transforms the actual head of the Linked list
-    setTimeout(() => {
-      setState((old) => {
-        const newState = { ...old };
-        if (newState.head.data === null) {
-          newState.head.data = newState.tail.data = num;
-          newState.head.isHead = newState.head.isTail = true;
-        } else {
-          //Reset head  marker
-          newState.head.isHead =
-            newState.head.new =
-            newState.head.selected =
-              false;
-          //add new node
-          const newNode = new Node(num, newState.head);
-          newNode.isHead = newNode.new = true;
-          newState.head = newNode;
-        }
-        newState.size++;
-        toggleAnimation(); // ends an animation is in progress
-        return newState;
-      });
-    }, timeout);
+    addNode(false, num);
   };
+  /************* End Adding Nodes **************/
+
+  /************* Removing Nodes **************/
+  const removeNode = (removeFromTail: boolean) => {
+    if (displayList.length === 0) return;
+    toggleAnimation();
+    clearColorIndicators();
+    let timeout = 0;
+
+    // Get Head Or Tail
+    timeout = step((old) => {
+      const newList = [...old];
+      const HorT = getHeadOrTail(removeFromTail, newList);
+      // reset new/selector indicators on prepends
+      if (newList[HorT]) newList[HorT].selected = true;
+      return newList;
+    }, timeout);
+
+    // if there is only one node left remove last node
+    if (displayList.length === 1) {
+      console.log("one left");
+
+      step(() => {
+        toggleAnimation();
+        return [];
+      }, timeout);
+      return;
+    }
+
+    // Get New Head/ Tail / Remov
+    timeout = step((old) => {
+      const newList = [...old];
+      const newHeadorTail = getPreHeadOrTail(removeFromTail, newList);
+      newList[newHeadorTail].selected = true;
+      return newList;
+    }, timeout);
+
+    // Indicate Remove Old Head/Tail and switch pointer
+    timeout = step((old) => {
+      const newList = [...old];
+      const newHeadorTail = getPreHeadOrTail(removeFromTail, newList);
+      const headOrTail = getHeadOrTail(removeFromTail, newList);
+
+      // Set selected indicators to false and remove tail/head
+      // pointer from removed node
+      newList[newHeadorTail].selected =
+        newList[headOrTail].selected =
+        newList[headOrTail][removeFromTail ? "isTail" : "isHead"] =
+          false;
+
+      // Indicate the previous head will be removed and indicate
+      // the new head or tail
+      newList[headOrTail].removed =
+        newList[newHeadorTail][removeFromTail ? "isTail" : "isHead"] =
+        newList[newHeadorTail].new =
+          true;
+
+      // Remove appropriate next pointers
+      newList[removeFromTail ? newList.length - 2 : 0].next = null;
+
+      toggleAnimation();
+      return newList;
+    }, timeout);
+
+    //Delete Node
+    timeout = step((old) => {
+      const newList = [...old];
+      newList[removeFromTail ? "pop" : "shift"]();
+      return newList;
+    }, timeout);
+
+    // To chain remove Node functions
+    return;
+  };
+
+  const removeHead = () => {
+    removeNode(false);
+  };
+
+  const removeTail = () => {
+    removeNode(true);
+  };
+
+  const clear = (instant?: boolean) => {
+    if (instant) {
+      setDisplay([]);
+    } else {
+      let timeout = 0;
+      for (let i = 0; i < displayList.length; ) {
+        console.log(timeout, "befoer");
+
+        setTimeout(() => {
+          removeNode(false);
+          i++
+          timeout += stepDelay;
+        }, timeout);
+        console.log(timeout, "after update");
+      }
+    }
+  };
+  /************* End Removing Nodes **************/
+
   const value = {
     display: displayList,
     append,
     prepend,
+    removeHead,
+    removeTail,
+    clear,
   };
   return (
     <LinkedListContext.Provider value={value}>

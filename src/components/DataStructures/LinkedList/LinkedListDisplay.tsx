@@ -28,7 +28,7 @@ const DisplayNode = ({ node }: NodeProps) => {
 
   return (
     <>
-      <div className={`${s.node} ${overlap && s.overlap} ${node.new && `new_el`} ${node.selected && 'selected_el'}`}>
+      <div className={`${s.node} ${overlap && s.overlap} ${node.new && `new_el`} ${node.selected && 'selected_el'} ${node.removed && 'removed_el'}`}>
         <span>{node.data}</span>
         {node.next && <BsArrowRight className={`${s.next_pointer} ${node.next.new && 'new_el'}`} />}
         {node.isHead && <Identifier pointer="head" />}
