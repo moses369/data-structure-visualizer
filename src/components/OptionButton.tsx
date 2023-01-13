@@ -7,15 +7,16 @@ interface OptionButtonProps {
   className?: string;
   onClick?: (event?: BtnClickEvent) => void;
   text: string;
+disabled?:boolean
 }
 
-const OptionButton = ({ className, onClick, text }: OptionButtonProps) => {
+const OptionButton = ({ className, onClick, text, disabled }: OptionButtonProps) => {
   const { animationInProgress } = React.useContext(
     AppContext
   ) as AppContextTypes;
   return (
     <button
-      disabled={animationInProgress}
+      disabled={animationInProgress || disabled }
       onClick={onClick}
       className={className}
     >

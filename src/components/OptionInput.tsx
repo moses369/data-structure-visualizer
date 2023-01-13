@@ -9,6 +9,8 @@ interface OptionInputProps {
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   name: string;
   type: React.HTMLInputTypeAttribute;
+  labelText: string;
+  disabled?:boolean;
 }
 
 const OptionInput = ({
@@ -17,18 +19,21 @@ const OptionInput = ({
   type,
   onChange,
   name,
+  labelText,
+  disabled
 }: OptionInputProps) => {
   const { animationInProgress } = React.useContext(
     AppContext
   ) as AppContextTypes;
-  if(name.includes(' ')) throw new Error('No whitespace allowes use _ instead')
+  if (name.includes(" "))
+    throw new Error("No whitespace allowes use _ instead");
   return (
     <>
-      <label htmlFor={name}>{name.replace("_", " ")}</label>
+      <label htmlFor={name}>{labelText}</label>
       <input
         type={type}
         name={name}
-        disabled={animationInProgress}
+        disabled={animationInProgress || disabled}
         onChange={onChange}
         value={value}
         className={className}

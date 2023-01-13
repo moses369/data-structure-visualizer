@@ -6,7 +6,8 @@ interface AppContextState {
   animationInProgress: boolean;
 }
 export interface AppContextTypes extends AppContextState {
-  toggleAnimation: () => void;
+  startAnimation: () => void;
+  endAnimation: () => void;
   selectDS: (ds: DSTypes) => void;
 }
 
@@ -25,10 +26,16 @@ const AppContextProvider = ({ children }: ReactChildren) => {
     });
   };
 
-  const toggleAnimation = () => {
+  const startAnimation = () => {
     setState((old) => ({
       ...old,
-      animationInProgress: !old.animationInProgress,
+      animationInProgress: true,
+    }));
+  };
+  const endAnimation = () => {
+    setState((old) => ({
+      ...old,
+      animationInProgress: false,
     }));
   };
 
@@ -36,7 +43,8 @@ const AppContextProvider = ({ children }: ReactChildren) => {
     activeDS: state.activeDS,
     animationInProgress: state.animationInProgress,
     selectDS,
-    toggleAnimation,
+    startAnimation,
+    endAnimation
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

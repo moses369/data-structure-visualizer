@@ -129,6 +129,7 @@ export interface LinkedListContextType {
   removeHead: VoidFunc;
   removeTail: VoidFunc;
   clear : (instant?:boolean) => void;
+  maxLength: number
 }
 
 
