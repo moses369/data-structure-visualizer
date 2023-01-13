@@ -7,7 +7,6 @@ import {
   UpdateNodeDisplay,
 } from "../types/LinkedListTypes";
 import { AppContext, AppContextTypes } from "./AppContextProvider";
-import { resolve } from "path";
 
 export const LinkedListContext = React.createContext<
   LinkedListContextType | undefined
@@ -149,25 +148,27 @@ const LinkedListContextProvider = ({ children }: ReactChildren) => {
     clearColorIndicators();
     console.log("started");
 
+    // Get an updated value on the lists length wont cause a re-render
+    // because state was not changed
     let oneNodeLeft = false;
+    setDisplay((old) => {
+      oneNodeLeft = old.length === 1;
+      return old;
+    });
 
     // Get Head Or Tail
     await step((old) => {
-      oneNodeLeft = old.length === 1;
-      console.log(oneNodeLeft, 'insode step');
-      
+      // oneNodeLeft = old.length === 1;
       const newList = [...old];
       const HorT = getHeadOrTail(removeFromTail, newList);
       // reset new/selector indicators on prepends
       if (newList[HorT]) newList[HorT].selected = true;
       return newList;
     }, 0);
-    console.log(oneNodeLeft, 'outside step');
 
     // if there is only one node left remove last node
     if (oneNodeLeft) {
-      console.log('early end');
-      
+      console.log("early end");
       await step([]);
       toggleAnimation();
       return;
@@ -225,8 +226,76 @@ const LinkedListContextProvider = ({ children }: ReactChildren) => {
     removeNode(true);
   };
 
+  const removeMidNode = async (num: number) => {
+    toggleAnimation();
+    clearColorIndicators();
+    if (displayList.length === 0) return;
+    // Remove node if it is the head or tail
+    if (num === displayList[0].data) {
+      removeHead();
+      return;
+    }
+    if (num === displayList[displayList.length - 1].data) {
+      removeTail();
+      return;
+    }
+
+    // Show that we checked the tail first
+    await step((old) => {
+      const newList = [...old];
+      newList[newList.length - 1].selected = true;
+      return newList;
+    }, 0);
+
+    let foundNodeI: number | undefined;
+    //Find the Node
+    for (let i = 0; i < displayList.length; i++) {
+      //Move through the linked list
+      await step((old) => {
+        const newList = [...old];
+
+        newList[newList.length - 1].selected = false;
+        newList[i].selected = true;
+
+        const prev2 = i - 1;
+        const next = i + 1;
+
+        if (newList[prev2]) newList[prev2].selected = false;
+        if (newList[next]) newList[next].selected = true;
+
+        if (newList[i].data === num) console.log("find");
+        return newList;
+      });
+
+      if (displayList[i + 1]?.data === num) {
+        foundNodeI = i + 1;
+        break;
+      }
+    }
+    if (foundNodeI === undefined) {
+      toggleAnimation();
+      return;
+    }
+    const nodeI = foundNodeI as number;
+    //Select the next node and show we will remove the found node
+    await step((old) => {
+      const newList = [...old];
+      newList[nodeI + 1].selected = true;
+      newList[nodeI].removed = true;
+      return newList;
+    });
+
+    //Remove the node
+    await step((old) => {
+      return old.filter((node, i) => i !== nodeI);
+    });
+
+    toggleAnimation();
+  };
+
   const clear = async (instant?: boolean) => {
     toggleAnimation();
+    clearColorIndicators();
     if (instant) {
       setDisplay([]);
     } else {
@@ -245,6 +314,7 @@ const LinkedListContextProvider = ({ children }: ReactChildren) => {
     removeHead,
     removeTail,
     clear,
+    removeMidNode,
   };
   return (
     <LinkedListContext.Provider value={value}>

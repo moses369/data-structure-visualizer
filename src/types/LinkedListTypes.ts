@@ -117,16 +117,21 @@ export interface LinkedListState {
   size: number;
 }
 
+export type NodeFunc = (num: number) => void;
+
 export type VoidFunc = () => void
 
 export interface LinkedListContextType {
   display: Node[];
-  append: (num: number) => void;
-  prepend: (num: number) => void;
+  append: NodeFunc
+  prepend: NodeFunc
+  removeMidNode: NodeFunc
   removeHead: VoidFunc;
   removeTail: VoidFunc;
   clear : (instant?:boolean) => void;
 }
+
+
 
 export type GetHeadOrTailType =  (
   updatingTail: boolean,
